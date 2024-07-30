@@ -1,10 +1,10 @@
 const {getCategory} = require('../model/groceryModel.js')
 
 const _getCategory = async (req, res) =>{
-    const {item} = req.body;
-    console.log(item);
+    const {itemsArr} = req.body;
+    console.log(itemsArr);
     try {
-        const result = await getCategory(item)
+        const result = await getCategory(itemsArr)
         res.json(result);
     } catch (error) {
         console.log(error);

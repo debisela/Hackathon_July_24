@@ -1,19 +1,19 @@
 
 const checkCategory = (event)=>{
     event.preventDefault();
-    const item = event.target.textField.value;
-    // const itemsArr = items.split(',').map(item => item.trim())
-    console.log(item);
+    const items = event.target.textField.value;
+    const itemsArr = items.split(',').map(item => item.trim())
+    console.log(items);
     fetch('http://localhost:3200/groceries',{
         method: 'POST',
         headers:{
             'Content-Type': 'application/json'
         },
-        body:JSON.stringify({item})
+        body:JSON.stringify({itemsArr})
     })
     .then(res =>res.json())
     .then(data =>{
-        console.log(data[0].category);
+        console.log(data);
     })
     .catch((error)=>{
         console.log(error);
