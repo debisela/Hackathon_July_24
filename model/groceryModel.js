@@ -6,7 +6,8 @@ const getCategory = async (itemsArr) =>{
             const result = await db('groceries')
             .select('item_name','category')
             .where('item_name', 'ILIKE', item)
-            return result;
+            return result.length > 0 ? result[0] : { item_name: item, category: 'Not found' };
+            
         }))
         return newArr;
 
