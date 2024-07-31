@@ -14,10 +14,18 @@ const checkCategory = (event)=>{
     .then(res =>res.json())
     .then(data =>{
         console.log(data);
+        renderList(data);
     })
     .catch((error)=>{
         console.log(error);
     })
+}
+
+function renderList(arr){
+    let html = arr.map((item,index)=>{
+        return `<h1>${item[index][index].category}</h1><h3>${item[index][index].item_name}</h3>`
+    })
+    document.getElementById('orderedList').innerHTML=html.join("")
 }
 
 
