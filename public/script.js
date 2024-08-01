@@ -1,8 +1,9 @@
 
 const checkCategory = (event)=>{
     event.preventDefault();
+    document.getElementById('inputText').innerHTML=`${``}`
     const items = event.target.textField.value;
-    const itemsArr = items.split(',').map(item => item.trim())
+    const itemsArr = items.split(/[,./:]/).map(item => item.trim())
     console.log(items);
     fetch('http://localhost:3200/groceries',{
         method: 'POST',
@@ -22,8 +23,29 @@ const checkCategory = (event)=>{
 }
 
 function renderList(arr){
-    let html = arr.map((item,index)=>{
-        return `<h1>${item[index][index].category}</h1><h3>${item[index][index].item_name}</h3>`
+    //order by category
+    const groupItems = arr.reduce((acc, item)=>{
+        const category = item.category;
+        if(!acc[category]){
+            acc[category] = []
+        }
+        acc[category].push(item.item_name)
+        return acc;
+    }, {})
+    let html = Object.entries(groupItems).map(([category, items])=>{
+        let htmlContent = `<div>
+                <h1>${category}</h1>
+                <ul>
+                    ${items.map(item => `<li>
+                        ${item}
+                        <input type="checkbox" name="inCart" value="${item}"> In Cart
+                            <input type="checkbox" name="notFound" value="${item}"> Not Found
+                        </li>`)
+                        .join('')}
+                </ul>
+            </div>
+        `
+        return htmlContent;
     })
     document.getElementById('orderedList').innerHTML=html.join("")
 }
