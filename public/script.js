@@ -1,8 +1,9 @@
 
 const checkCategory = (event)=>{
     event.preventDefault();
+    document.getElementById('inputText').innerHTML=`${``}`
     const items = event.target.textField.value;
-    const itemsArr = items.split(',').map(item => item.trim())
+    const itemsArr = items.split(/[,./:]/).map(item => item.trim())
     console.log(items);
     fetch('http://localhost:3200/groceries',{
         method: 'POST',
@@ -35,7 +36,12 @@ function renderList(arr){
         let htmlContent = `<div>
                 <h1>${category}</h1>
                 <ul>
-                    ${items.map(item => `<li>${item}</li>`).join('')}
+                    ${items.map(item => `<li>
+                        ${item}
+                        <input type="checkbox" name="inCart" value="${item}"> In Cart
+                            <input type="checkbox" name="notFound" value="${item}"> Not Found
+                        </li>`)
+                        .join('')}
                 </ul>
             </div>
         `
