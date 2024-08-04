@@ -36,8 +36,8 @@ function renderList(arr){
         let htmlContent = `<div>
                 <h1>${category}</h1>
                 <ul>
-                    ${items.map(item => `<li>
-                        ${item}
+                    ${items.map(item => `<li><span>
+                        ${item}</span>
                         <input type="checkbox" name="inCart" value="${item}"> In Cart
                             <input type="checkbox" name="notFound" value="${item}"> Not Found
                         </li>`)
