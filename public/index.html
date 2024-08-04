@@ -5,20 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Groceries app</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Kalam:wght@300;400;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <header><h1>easyCart</h1></header>
+    <div id="container">
     
     <div id="inputText">
     <form id="myForm" onsubmit="checkCategory(event)">
-        <textarea name="textField" id="textField" rows="20" cols="30"></textarea>
+        <textarea name="textField" id="textField" rows="10" cols="30">enter grocery list</textarea>
         <div>
         <button type="submit">submit</button>
     </div>
     </form>
 </div>
 <div id="orderedList"></div>
+</div>
 
-<button id="getSelectedItems">get selected items</button>
+<!-- <button id="getSelectedItems">get selected items</button> -->
 
 
     <script src="script.js"></script>
