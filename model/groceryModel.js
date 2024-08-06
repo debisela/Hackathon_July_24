@@ -5,13 +5,13 @@ const getCategory = async (itemsArr) =>{
         let newArr = await Promise.all(itemsArr.map(async (item)=>{
             //if less than 3 letters insertes-> return exact same item
             if (item.length<3){
-                const result = await db('groceries')
+                const result = await db('grocery_updated')
             .select('item_name','category')
             .where('item_name', item)
             return result.length > 0 ? {results:result,multiple:'false'} : {results:[{item_name: item, category: 'Category not found'}],multiple:'false'};
             }
             else {
-            const result = await db('groceries')
+            const result = await db('grocery_updated')
             .select('item_name','category')
             .where('item_name', 'ILIKE', `%${item}%`)
             //if no match found, show not found
