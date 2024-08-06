@@ -7,24 +7,23 @@ const getCategory = async (itemsArr) =>{
                 const result = await db('groceries')
             .select('item_name','category')
             .where('item_name', item)
-            return result.length > 0 ? result : { item_name: item, category: 'Category not found' };
+            return result.length > 0 ? {results:result,multiple:'false'} : {results:[{item_name: item, category: 'Category not found'}],multiple:'false'};
             }
             else {
             const result = await db('groceries')
             .select('item_name','category')
             .where('item_name', 'ILIKE', `%${item}%`)
-            // return result.length > 0 ? result : { item_name: item, category: 'Category not found' };
             if (result.length == 0){
-                return { item_name: item, category: 'Category not found' }
+                return {results:[{item_name: item, category: 'Category not found'}],multiple:'false'};
             }
             else if(result.length == 1) {
-                return result
+                return {results:result,multiple:'false'}
             }
-            return {item_name: item, category: 'multiple items found, please choose'}
+            return {results:result,multiple:'true'}
             }
             
         }))
-        return newArr.flat();
+        return newArr;
 
     } catch (error) {
         console.log(error);
