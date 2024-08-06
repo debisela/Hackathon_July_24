@@ -1,78 +1,118 @@
 let originalData = [];
+let notFoundItems = [];
 let itemStates = {};
 
-const checkCategory = (event)=>{
+//handle submit of groceries list
+const checkCategory = (event) => {
     event.preventDefault();
-    document.getElementById('inputText').innerHTML=`${``}`
+    document.getElementById('inputText').innerHTML = ``;
     const items = event.target.textField.value;
-    const itemsArr = items.split(/[,./:]/).map(item => item.trim())
+    //allow different dividers in list. create an array of the list:
+    const itemsArr = items.split(/[,./:]/).map(item => item.trim());
     console.log(items);
-    fetch('http://localhost:3200/groceries',{
+    //post to server and get data back from db
+    fetch('http://localhost:3200/groceries', {
         method: 'POST',
-        headers:{
+        headers: {
             'Content-Type': 'application/json'
         },
-        body:JSON.stringify({itemsArr})
+        body: JSON.stringify({ itemsArr })
     })
-    .then(res =>res.json())
-    .then(data =>{
+    .then(res => res.json())
+    .then(data => {
         console.log(data);
         originalData = data;
+        itemStates = {};
         renderList(originalData);
     })
-    .catch((error)=>{
+    .catch((error) => {
         console.log(error);
-    })
+    });
 }
 
-function renderList(arr){
-    //order by category
-    const groupItems = arr.reduce((acc, {results})=>{
-        results.forEach(({category, item_name}) => {
-        if(!acc[category]){
-            acc[category] = new Set();
-        }
-        acc[category].add(item_name);
-    });
+//function that displays in DOM the list divided into categories
+function renderList(arr) {
+    const groupItems = arr.reduce((acc, { results, multiple }) => {
+        results.forEach(({ category, item_name }) => {
+            if (multiple === 'true') {
+                category = 'Multiple Matches';
+            }
+            if (!acc[category]) {
+                acc[category] = new Set();
+            }
+            acc[category].add(item_name);
+        });
         return acc;
     }, {});
-    let html = Object.entries(groupItems).map(([category, itemsSet])=>{
+
+    let html = Object.entries(groupItems).map(([category, itemsSet]) => {
         const items = Array.from(itemsSet);
-        // let htmlContent = `<div>
-        //         <h2>${category}</h2>
-        //         <ul>
-        //             ${items.map(item => `<li><span>
-        //                 ${item}</span>
-        //                 <input type="radio" name="${item}" value="inCart" onchange="updateNotFoundItems('${item}','${category}', this)"> In Cart
-        //                     <input type="radio" name="${item}" value="notFound" onchange="updateNotFoundItems('${item}','${category}', this)"> Not Found
-        //                 </li>`)
-        //                 .join('')}
-        //         </ul>
-        //     </div>
-        // `
+
         let htmlContent = `<div>
                 <h2>${category}</h2>
                 <ul>
                     ${items.map(item => {
                         const itemKey = `${item}-${category}`;
-                        return `
-                            <li><span>${item}</span>
-                            <input type="radio" name="${itemKey}" value="inCart" ${itemStates[itemKey] === 'inCart' ? 'checked' : ''} onchange="updateNotFoundItems('${item}', '${category}', this)"> In Cart
-                            <input type="radio" name="${itemKey}" value="notFound" ${itemStates[itemKey] === 'notFound' ? 'checked' : ''} onchange="updateNotFoundItems('${item}', '${category}', this)"> Not Found
-                            </li>
-                        `;
+                        if (category === 'Multiple Matches') {
+                            return `
+                                <li>
+                                    <span>${item}</span>
+                                    <button onclick="selectItem('${item}', '${itemKey}')">Select</button>
+                                    <button onclick="removeItem('${item}')">Remove</button>
+                                </li>
+                            `;
+                        } else {
+                            return `
+                                <li>
+                                    <span>${item}</span>
+                                    <input type="radio" name="${itemKey}" value="inCart" ${itemStates[itemKey] === 'inCart' ? 'checked' : ''} onchange="updateNotFoundItems('${item}', '${category}', this)"> In Cart
+                                    <input type="radio" name="${itemKey}" value="notFound" ${itemStates[itemKey] === 'notFound' ? 'checked' : ''} onchange="updateNotFoundItems('${item}', '${category}', this)"> Not Found
+                                </li>
+                            `;
+                        }
                     }).join('')}
                 </ul>
             </div>
         `;
-
         return htmlContent;
-    })
-    document.getElementById('orderedList').innerHTML=html.join("")
-    document.getElementById('notFoundList').innerHTML=`<div><button id="hideFound" onclick ="hideFound(event)">show only not found</button></div>`
+    }).join('');
+
+    document.getElementById('orderedList').innerHTML = html;
+    document.getElementById('notFoundList').innerHTML = `
+        <div><button id="hideFound" onclick="hideFound(event)">Show Only Not Found</button></div>
+    `;
+    document.getElementById('startNewList').innerHTML = `
+        <div><button id="startNew" onclick="startNew(event)">Start new list</button></div>
+    `;
 }
 
-let notFoundItems = [];
+function selectItem(item, itemKey) {
+    const selectedItem = originalData.find(data => data.results.some(result => result.item_name === item));
+    if (selectedItem) {
+        const selectedResult = selectedItem.results.find(result => result.item_name === item);
+        const newCategory = selectedResult.category;
+
+        // Remove item from 'Multiple Matches' category
+        originalData.forEach(data => {
+            data.results = data.results.filter(result => result.item_name !== item);
+        });
+
+        // Add item to the appropriate category
+        originalData.push({ results: [{ item_name: item, category: newCategory }], multiple: 'false' });
+
+        renderList(originalData);
+    }
+}
+
+function removeItem(item) {
+    // Remove item from originalData
+    originalData.forEach(data => {
+        data.results = data.results.filter(result => result.item_name !== item);
+    });
+
+    // Re-render the list
+    renderList(originalData);
+}
 
 function updateNotFoundItems(item, category, radio) {
     const itemKey = `${item}-${category}`;
@@ -92,13 +132,14 @@ const hideFound = (event) => {
     event.preventDefault();
     console.log(notFoundItems);
 
-    // Format notFoundItems to match the structure expected by renderList
     const formattedNotFoundItems = notFoundItems.map(item => ({
         results: [item]
     }));
 
     renderList(formattedNotFoundItems);
-    document.getElementById('notFoundList').innerHTML=`<div><button id="showAll" onclick ="showAll(event)">show all</button></div>`
+    document.getElementById('notFoundList').innerHTML = `
+        <div><button id="showAll" onclick="showAll(event)">Show All</button></div>
+    `
 }
 
 const showAll = (event) => {
@@ -107,5 +148,18 @@ const showAll = (event) => {
     renderList(originalData);
 }
 
-
-
+const startNew = (event) => {
+    event.preventDefault();
+    originalData = [];
+    notFoundItems = [];
+    itemStates = {};
+    document.getElementById('orderedList').innerHTML = ``;
+    document.getElementById('notFoundList').innerHTML = ``;
+    document.getElementById('startNewList').innerHTML = ``;
+    document.getElementById('inputText').innerHTML = `<form id="myForm" onsubmit="checkCategory(event)">
+        <textarea name="textField" id="textField" rows="10" cols="30">enter grocery list</textarea>
+        <div>
+        <button type="submit">submit</button>
+    </div>
+    </form>`;
+}
