@@ -6,10 +6,19 @@ let itemStates = {};
 const checkCategory = (event) => {
     event.preventDefault();
     document.getElementById('inputText').innerHTML = ``;
+    document.getElementById('orderedList').innerHTML=`<div class="fa-3x">
+                <i class="fa-solid fa-sync fa-spin"></i>
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                <i class="fa-solid fa-cog fa-spin"></i>
+                <i class="fa-solid fa-cog fa-spin fa-spin-reverse"></i>
+                <i class="fa-solid fa-spinner fa-spin-pulse"></i>
+                <i class="fa-solid fa-spinner fa-spin-pulse fa-spin-reverse"></i>
+              </div><div id="loading">Loading...</div>`
+    //get items inserted in textfield
     const items = event.target.textField.value;
-    //allow different dividers in list. create an array of the list:
-    const itemsArr = items.split(/[,./:]/).map(item => item.trim());
-    console.log(items);
+    //allow different separators in list, create an array of the list:
+    const itemsArr = items.split(/[,./:\r\n]/).map(item => item.trim());
+    //console.log(items);
     //post to server and get data back from db
     fetch('http://localhost:3200/groceries', {
         method: 'POST',
@@ -57,8 +66,8 @@ function renderList(arr) {
                             return `
                                 <li>
                                     <span>${item}</span>
-                                    <button onclick="selectItem('${item}', '${itemKey}')">Select</button>
-                                    <button onclick="removeItem('${item}')">Remove</button>
+                                    <button class="select-remove" onclick="selectItem('${item}', '${itemKey}')">Select</button>
+                                    <button class="select-remove" onclick="removeItem('${item}')">Remove</button>
                                 </li>
                             `;
                         } else {
@@ -153,11 +162,11 @@ const startNew = (event) => {
     originalData = [];
     notFoundItems = [];
     itemStates = {};
-    document.getElementById('orderedList').innerHTML = ``;
+    document.getElementById('orderedList').innerHTML=``;
     document.getElementById('notFoundList').innerHTML = ``;
     document.getElementById('startNewList').innerHTML = ``;
     document.getElementById('inputText').innerHTML = `<form id="myForm" onsubmit="checkCategory(event)">
-        <textarea name="textField" id="textField" rows="10" cols="30">enter grocery list</textarea>
+        <textarea name="textField" id="textField" rows="10" cols="30" placeholder="enter grocery list"></textarea>
         <div>
         <button type="submit">submit</button>
     </div>
