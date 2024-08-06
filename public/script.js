@@ -41,25 +41,42 @@ const checkCategory = (event) => {
 
 //function that displays in DOM the list divided into categories
 function renderList(arr) {
+    //group items by category
     const groupItems = arr.reduce((acc, { results, multiple }) => {
         results.forEach(({ category, item_name }) => {
+            //assign category multiple matches to items where multiple found
             if (multiple === 'true') {
                 category = 'Multiple Matches';
             }
+            // Initialize the category if it doesn't exist
             if (!acc[category]) {
-                acc[category] = new Set();
+                acc[category] = [];
             }
-            acc[category].add(item_name);
+            // Avoid adding duplicates to the category
+            if (!acc[category].includes(item_name)) {
+                acc[category].push(item_name);
+            }
         });
         return acc;
     }, {});
+    
+    console.log(groupItems);
 
-    let html = Object.entries(groupItems).map(([category, itemsSet]) => {
-        const items = Array.from(itemsSet);
-
+//show if multiple matches always first
+    const sortedCategories = Object.entries(groupItems).sort(([a], [b]) => {
+        if (a === 'Multiple Matches') return -1;
+        if (b === 'Multiple Matches') return 1;
+        if (a === 'Category not found') return 1; // Place 'Not Found' last
+        if (b === 'Category not found') return -1; // Place 'Not Found' last
+        return 0;
+    });
+//map through categories
+    let html = sortedCategories.map(([category, items]) => {
+//map through items in category
         let htmlContent = `<div>
                 <h2>${category}</h2>
                 <ul>
+                
                     ${items.map(item => {
                         const itemKey = `${item}-${category}`;
                         if (category === 'Multiple Matches') {
@@ -95,6 +112,7 @@ function renderList(arr) {
     `;
 }
 
+//if multiple, select item
 function selectItem(item, itemKey) {
     const selectedItem = originalData.find(data => data.results.some(result => result.item_name === item));
     if (selectedItem) {
@@ -112,7 +130,7 @@ function selectItem(item, itemKey) {
         renderList(originalData);
     }
 }
-
+//function that removes from multiple items
 function removeItem(item) {
     // Remove item from originalData
     originalData.forEach(data => {
@@ -122,7 +140,7 @@ function removeItem(item) {
     // Re-render the list
     renderList(originalData);
 }
-
+//function to create array of not found items in store
 function updateNotFoundItems(item, category, radio) {
     const itemKey = `${item}-${category}`;
     itemStates[itemKey] = radio.value;
@@ -136,7 +154,7 @@ function updateNotFoundItems(item, category, radio) {
     }
     console.log(notFoundItems);
 }
-
+//show only the items on the list that are still missing in the cart
 const hideFound = (event) => {
     event.preventDefault();
     console.log(notFoundItems);
@@ -150,13 +168,13 @@ const hideFound = (event) => {
         <div><button id="showAll" onclick="showAll(event)">Show All</button></div>
     `
 }
-
+//show all items on list
 const showAll = (event) => {
     event.preventDefault();
     console.log(notFoundItems);
     renderList(originalData);
 }
-
+//option to start a new list
 const startNew = (event) => {
     event.preventDefault();
     originalData = [];
