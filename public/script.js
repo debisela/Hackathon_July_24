@@ -20,7 +20,7 @@ const checkCategory = (event) => {
     const itemsArr = items.split(/[,./:\r\n]/).map(item => item.trim());
     //console.log(items);
     //post to server and get data back from db
-    fetch('http://localhost:3200/groceries', {
+    fetch('https://easycart-bkku.onrender.com/groceries', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
